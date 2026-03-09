@@ -38,7 +38,9 @@ beta_LV <- 0.15
 # --------------------------
 # Generate dataset: latents + reflective indicators
 # L is measured by 3 reflective indicators (REPUR, HIGHPTOL,
-# LOWPTOL), matching the empirical ACSI illustration.
+# LOWPTOL) in the simulation DGP. This differs from the empirical
+# illustration (single-item REPUR) to support loading/reliability
+# manipulation in the Monte Carlo design (see manuscript Section 6.1).
 # --------------------------
 gen_acsi_data <- function(N, lambda=0.70, rho=0.0, truth_id="M6") {
   flags <- make_truth_flags(truth_id)

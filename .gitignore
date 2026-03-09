@@ -1,12 +1,23 @@
+# R session files
 .Rhistory
-RData
+.RData
 .Rproj.user/
 *.Rproj
+
+# Temporary / backup
 *.tmp
 *.bak
 *.swp
-*.docx
-*.pdf
+*~
+
+# Simulation checkpoints (intermediate, large)
+sim_outputs/chunks/
+
+# OS files
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Manuscript files (not part of reproducibility package)
+*.docx
+*.pdf

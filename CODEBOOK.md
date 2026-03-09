@@ -1,9 +1,52 @@
-# CODEBOOK — Simulation Output Variables
+# CODEBOOK — Variable Definitions and Data Dictionary
 
-This codebook documents the columns in `outputs_simulation/sim_main.csv`
-and the summary tables in `inputs_simulation/`.
+This codebook documents the variables in the ACSI empirical analysis
+(`outputs_main/`) and the simulation study (`sim_outputs/`).
 
-## sim_main.csv — Cell-level raw results (7,200 rows)
+---
+
+## Part A: ACSI Empirical Data
+
+### Raw indicators (inputs_main/ACSI Data 2015 ver2.xlsx)
+
+| Variable | Construct | Description | Scale |
+|----------|-----------|-------------|-------|
+| `OVERALLX` | Expectations (E) | Overall expectations of quality | 1–10 |
+| `CUSTOMX` | Expectations (E) | Expectations of customization | 1–10 |
+| `WRONGX` | Expectations (E) | Expectations of reliability (reverse-coded) | 1–10 |
+| `OVERALLQ` | Perceived quality (Q) | Overall quality experience | 1–10 |
+| `CUSTOMQ` | Perceived quality (Q) | Customization quality | 1–10 |
+| `WRONGQ` | Perceived quality (Q) | Reliability quality (reverse-coded) | 1–10 |
+| `PQ` | Perceived value (V) | Price given quality | 1–10 |
+| `QP` | Perceived value (V) | Quality given price | 1–10 |
+| `SATIS` | Satisfaction (S) | Overall satisfaction | 1–10 |
+| `CONFIRM` | Satisfaction (S) | Confirmation of expectations | 1–10 |
+| `IDEAL` | Satisfaction (S) | Distance from ideal | 1–10 |
+| `REPUR` | Loyalty (L) | Repurchase intention (prediction target) | 1–10 |
+| `INDUSTRY` | — | ACSI industry code (stratification variable) | Categorical |
+| `YEAR` | — | Survey year | Integer |
+
+**Notes:**
+- Values >10 are recoded to NA in `00_prepare_data.R`.
+- HIGHPTOL and LOWPTOL (price tolerance) are excluded: different scale (percentage), high missingness (21% and 84%).
+- Loyalty is a single-item construct (REPUR only).
+
+### outputs_main/ key files
+
+| File | Rows | Description |
+|------|------|-------------|
+| `measurement_audit_table_A0.csv` | 12 | Loadings, α, ρc, rho_A, AVE per indicator |
+| `htmt_matrix.csv` | 4×4 | HTMT among multi-item constructs (E, Q, V, S) |
+| `summary_tables.csv` | varies | Pooled performance, CVPAT results, stability metrics |
+| `model_frequency.csv` | 8 | Selection frequency per model (M0–M7) |
+| `performance_by_outer_split.csv` | 50 | RMSE/MAE per outer split (selected vs M0 vs lm) |
+| `performance_by_industry.csv` | 4 | RMSE/MAE per industry sector |
+
+---
+
+## Part B: Simulation Output Variables
+
+### sim_outputs/sim_main.csv — Cell-level raw results (7,200 rows)
 
 ### Design factors
 | Column | Description |
@@ -59,17 +102,17 @@ and the summary tables in `inputs_simulation/`.
   selected model, which matches the "deploy the winner" paradigm. These
   are retained for backward compatibility and robustness comparison.
 
-## Table_S2_optimism.csv — Miscalibration summary
+## sim_outputs/Table_S2_optimism.csv — Miscalibration summary
 
 Aggregated means of optimism (reported − true RMSE) and true performance
 by design cell (N × lambda × rho × truth).
 
-## Table_S3_selection_accuracy.csv — Selection accuracy summary
+## sim_outputs/Table_S3_selection_accuracy.csv — Selection accuracy summary
 
 Aggregated means of TPR, FPR, F1 for both naïve and nested pipelines
 by design cell.
 
-## Table_S4_stable_core_tau.csv — Stability-augmented model selection
+## sim_outputs/Table_S4_stable_core_tau.csv — Stability-augmented model selection
 
 True RMSE/MAE and inclusion probabilities (pE, pQ, pV) for the
 stable-core model at each stability threshold τ ∈ {0.6, 0.7, 0.8},

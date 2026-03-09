@@ -2,19 +2,18 @@
 # 02_make_figures_simulation.R
 # Reproduce SIMULATION figures (Figures S1–S4) from full outputs.
 #
-# Data sources:
-#   FigS1 — outputs_simulation/sim_main.csv  (modal-evaluation FPR)
-#   FigS2 — inputs_simulation/Table_S2       (pipeline miscalibration)
-#   FigS3 — inputs_simulation/Table_S4       (stable-core correctness)
-#   FigS4 — inputs_simulation/Table_S4       (stable-core RMSE)
+# Data sources (all from ../sim_outputs/):
+#   FigS1 — Table_S2_optimism.csv         (pipeline miscalibration)
+#   FigS2 — sim_main.csv                  (modal-evaluation FPR)
+#   FigS3 — Table_S4_stable_core_tau.csv  (stable-core correctness)
+#   FigS4 — Table_S4_stable_core_tau.csv  (stable-core RMSE)
 #
 # Outputs: ../figures_simulation/ as 600-DPI PNG + TIFF
 # ─────────────────────────────────────────────────────────────────────
 rm(list = ls())
 
-in_dir  <- file.path("..", "inputs_simulation")
+in_dir  <- file.path("..", "sim_outputs")
 out_dir <- file.path("..", "figures_simulation")
-raw_dir <- file.path("..", "outputs_simulation")
 dir.create(out_dir, showWarnings = FALSE, recursive = TRUE)
 
 # ── Global palette ───────────────────────────────────────────────────
@@ -68,11 +67,11 @@ add_hgrid <- function(at) abline(h = at, col = col_grid, lwd = 0.5)
 # ── Load data ────────────────────────────────────────────────────────
 s2  <- read.csv(file.path(in_dir, "Table_S2_optimism.csv"))
 s4  <- read.csv(file.path(in_dir, "Table_S4_stable_core_tau.csv"))
-sim <- read.csv(file.path(raw_dir, "sim_main.csv"))
+sim <- read.csv(file.path(in_dir, "sim_main.csv"))
 sim_ok <- subset(sim, status == "ok")
 
 # =====================================================================
-#  Figure S1 — FPR by sample size (MODAL evaluation)
+#  Figure S2 — FPR by sample size (MODAL evaluation)
 #  Manuscript Sec 6.4.2: "nested CV reduces FPR from 0.265 to 0.223"
 #  Uses nested_modal_FPR from sim_main.csv (single most-frequent model)
 # =====================================================================
@@ -81,7 +80,7 @@ fpr_by_N <- aggregate(
   FUN = function(x) mean(x, na.rm = TRUE)
 )
 
-save_fig("FigS1_FPR_by_N", expr = quote({
+save_fig("FigS2_FPR_by_N", expr = quote({
   yr <- range(c(fpr_by_N$naive_FPR, fpr_by_N$nested_modal_FPR))
   yr <- yr + c(-0.015, 0.015)
   plot(fpr_by_N$N, fpr_by_N$naive_FPR,
@@ -111,14 +110,14 @@ save_fig("FigS1_FPR_by_N", expr = quote({
 }))
 
 # =====================================================================
-#  Figure S2 — Absolute miscalibration by sample size
+#  Figure S1 — Absolute miscalibration by sample size
 #  |reported RMSE − true RMSE| averaged over conditions within each N
 # =====================================================================
 s2$abs_naive  <- abs(s2$naive_optimism_rmse)
 s2$abs_nested <- abs(s2$nested_optimism_rmse)
 bias_by_N <- aggregate(cbind(abs_naive, abs_nested) ~ N, data = s2, FUN = mean)
 
-save_fig("FigS2_AbsMiscalibration_by_N", expr = quote({
+save_fig("FigS1_AbsMiscalibration_by_N", expr = quote({
   yr <- range(c(bias_by_N$abs_naive, bias_by_N$abs_nested))
   yr <- c(0, yr[2] * 1.15)
   plot(bias_by_N$N, bias_by_N$abs_naive,

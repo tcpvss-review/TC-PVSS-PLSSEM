@@ -67,7 +67,7 @@ optional_edges <- c("E_L","Q_L","V_L")
 # Workers: uses up to 24, or availableCores-2, whichever smaller.
 MAX_WORKERS <- 24
 CHUNK_SIZE  <- 50     # 50–200 typical. 50 is safer for RAM/overhead balance.
-RESUME      <- TRUE   # if TRUE: skip chunks already present in sim_outputs/chunks
+RESUME      <- TRUE   # if TRUE: skip chunks already present in ../sim_outputs/chunks
 
 timestamp <- function() format(Sys.time(), "%Y-%m-%d %H:%M:%S")
 

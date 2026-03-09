@@ -2,7 +2,7 @@
 
 **Theory-Constrained, Prediction-Validated Specification Search for PLS-SEM: A Transparent Model Selection Protocol**
 
-*Submitted to the Journal of Marketing Management Special Issue on Model Selection*
+*Submitted to the Journal of Marketing Management Special Issue on Model Selection in Marketing Research*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE.txt)
 
@@ -10,118 +10,161 @@
 
 ---
 
-## Abstract
+## Overview
 
-This repository contains the complete code, data, and materials needed to reproduce all results, figures, and tables in the manuscript. TC-PVSS is a transparent model selection protocol for PLS-SEM that integrates theory-constrained admissibility, nested cross-validation, and stability reporting. The empirical illustration uses ACSI satisfaction–loyalty data; the simulation study uses a full-factorial Monte Carlo design.
+This repository contains the complete code, data, and materials needed to reproduce all empirical results, simulation results, figures, and tables in the manuscript. TC-PVSS is a transparent model selection protocol for PLS-SEM that integrates theory-constrained admissibility, nested cross-validation, prediction-validated selection with lm benchmarking, and stability reporting.
+
+The empirical illustration uses ACSI 2015 (v2) satisfaction–loyalty data with 12 indicators, a single-item loyalty construct (REPUR), and eight candidate structural models (M0–M7). The simulation study uses a full-factorial Monte Carlo design (36 cells × 200 replications = 7,200 runs).
 
 ## Repository Structure
 
 ```
 TC-PVSS-PLSSEM/
 │
-├── README.md                    ← This file
-├── CITATION.cff                 ← Citation metadata
-├── LICENSE.txt                  ← MIT License
-├── CODEBOOK.md                  ← Variable definitions and data dictionary
-├── HOW_TO_REPRODUCE.md          ← Detailed reproduction instructions
+├── README.md                       ← This file
+├── HOW_TO_REPRODUCE.md             ← Step-by-step reproduction guide
+├── CITATION.cff                    ← Citation metadata
+├── LICENSE.txt                     ← MIT License
+├── CODEBOOK.md                     ← Variable definitions and data dictionary
 │
-├── code_figures/
-│   ├── 01_make_figures_main.R   ← Generates Figures 1–5 (main text)
-│   └── 02_make_figures_simulation.R  ← Generates Figures S1–S4 (appendix)
+├── code_main/                      ← ACSI empirical analysis pipeline
+│   ├── 00_prepare_data.R           #  Step A0: Raw Excel → cleaned rds
+│   ├── 01_measurement_audit.R      #  Step A1: Measurement model assessment
+│   ├── 02_nested_cv_search.R       #  Step A2: Nested CV + lm benchmark
+│   └── 03_summarize_and_cvpattest.R #  Step A3: Summaries, CVPAT, diagnostics
 │
-├── code_simulation/
-│   └── [simulation scripts]     ← Monte Carlo simulation with checkpointing
+├── code_figures/                   ← Manuscript figure generation
+│   ├── 01_make_figures_main.R      #  Figures 1–5 (main text)
+│   ├── 02_make_figures_simulation.R #  Figures S1–S4 (Online Appendix)
+│   └── 99_session_info.R          #  Export R session info
 │
-├── inputs_main/
-│   ├── acsi_data.csv            ← ACSI empirical data
-│   └── nested_cv_results.csv    ← Nested-CV output for ACSI illustration
+├── code_simulation/                ← Monte Carlo simulation
+│   ├── 00_config.R                 #  Design factors, seeds, parallel settings
+│   ├── 01_core_functions.R         #  DGP, estimation, CV, scoring
+│   ├── 02_run_simulation_parallel.R #  Parallel execution with checkpointing
+│   ├── 03_summarize_simulation.R   #  Paper-ready summary tables
+│   └── README.md                   #  Internal run instructions
 │
-├── inputs_simulation/
-│   └── sim_config.R             ← Simulation design parameters
+├── inputs_main/                    ← Raw empirical data (read-only)
+│   └── ACSI Data 2015 ver2.xlsx
 │
-├── outputs_simulation/
-│   ├── sim_main.csv             ← Main simulation results (modal metrics)
-│   └── sim_stable.csv           ← Stability-augmented results (τ sensitivity)
+├── outputs_main/                   ← All ACSI analysis outputs
+│   ├── acsi_clean.rds              #  Cleaned data (from 00)
+│   ├── measurement_audit_table_A0.csv  # Loadings, CR, AVE (from 01)
+│   ├── htmt_matrix.csv             #  HTMT discriminant validity (from 01)
+│   ├── fornell_larcker.csv         #  Fornell-Larcker criterion (from 01)
+│   ├── pred_errors_long.parquet    #  Per-case predictions (from 02)
+│   ├── outer_results.parquet       #  Per-split summaries (from 02)
+│   ├── summary_tables.csv          #  Pooled performance + CVPAT (from 03)
+│   ├── model_frequency.csv         #  Model selection frequencies (from 03)
+│   ├── performance_by_outer_split.csv  # Split-level metrics (from 03)
+│   ├── performance_by_industry.csv #  Industry breakdown (from 03)
+│   └── fig_*.png                   #  Diagnostic plots (from 03)
 │
-├── figures_main/
-│   └── fig1–fig5 (.png + .tiff, 600 DPI)
+├── sim_outputs/                    ← Simulation results (generated by code_simulation/)
+│   ├── chunks/                     #  Checkpoint parquets (intermediate)
+│   ├── sim_main.csv                #  Main results (7,200 rows)
+│   ├── sim_main.parquet
+│   ├── sim_stable.csv              #  Stability-augmented (τ sensitivity)
+│   ├── sim_stable.parquet
+│   ├── Table_S2_optimism.csv       #  Optimism bias (36 rows)
+│   ├── Table_S3_selection_accuracy.csv  # TPR/FPR/F1 (36 rows)
+│   ├── Table_S4_stable_core_tau.csv    # τ sensitivity (720 rows)
+│   └── run_log.txt                 #  Timestamps and run parameters
 │
-├── figures_simulation/
-│   └── figS1–figS4 (.png + .tiff, 600 DPI)
+├── figures_main/                   ← Manuscript figures (600 DPI)
+│   └── Fig1–Fig5 (.png + .tif)
+│
+├── figures_simulation/             ← Online Appendix figures (600 DPI)
+│   └── FigS1–FigS4 (.png + .tif)
 │
 └── logs/
-    └── sessionInfo.txt          ← R session information
+    └── sessionInfo.txt             ← R session information
 ```
 
-## How to Reproduce (Quick Start)
+## Quick Start
 
-### Step 1: Install R and Required Packages
+See [HOW_TO_REPRODUCE.md](HOW_TO_REPRODUCE.md) for detailed instructions. Summary:
 
-**R version:** 4.3.0 or later (tested on R 4.3.2)
+```bash
+cd TC-PVSS-PLSSEM
 
-```r
-install.packages(c(
-  "seminr",       # PLS-SEM estimation (≥ 2.3.0)
-  "ggplot2",      # Figures
-  "dplyr",        # Data wrangling
-  "tidyr",        # Data reshaping
-  "readr",        # CSV I/O
-  "patchwork",    # Multi-panel figures
-  "scales",       # Axis formatting
-  "RColorBrewer"  # Color palettes
-))
+# ── Pipeline A: ACSI empirical analysis (~2–4 hours total, mostly Step A2) ──
+cd code_main
+Rscript 00_prepare_data.R
+Rscript 01_measurement_audit.R
+Rscript 02_nested_cv_search.R              # ~2–4 hours (nested CV)
+Rscript 03_summarize_and_cvpattest.R
+cd ..
+
+# ── Pipeline C: Manuscript figures ──
+cd code_figures
+Rscript 01_make_figures_main.R             # Figures 1–5
+Rscript 02_make_figures_simulation.R        # Figures S1–S4
+cd ..
+
+# ── (Optional) Pipeline B: Re-run full simulation (~8–24 hours) ──
+cd code_simulation
+Rscript -e 'source("00_config.R"); source("01_core_functions.R"); source("02_run_simulation_parallel.R")'
+Rscript 03_summarize_simulation.R
+cd ..
 ```
 
-### Step 2: Set Working Directory
-
-```r
-setwd("/path/to/TC-PVSS-PLSSEM")
-```
-
-### Step 3: Reproduce Main Figures (Figures 1–5)
-
-```r
-source("code_figures/01_make_figures_main.R")
-```
-
-### Step 4: Reproduce Simulation Figures (Figures S1–S4)
-
-```r
-source("code_figures/02_make_figures_simulation.R")
-```
-
-### Step 5: (Optional) Re-run Full Simulation
-
-```r
-# WARNING: Full simulation requires ~8–12 hours on 8-core machine
-source("code_simulation/run_simulation.R")
-```
+**Important:** All scripts use relative paths (e.g., `../outputs_main/`). You must `cd` into the appropriate `code_*/` directory before running each pipeline.
 
 ## Software Requirements
 
 | Software | Version | Purpose |
 |----------|---------|---------|
 | R | ≥ 4.3.0 | Statistical computing |
-| seminr | ≥ 2.3.0 | PLS-SEM estimation |
-| ggplot2 | ≥ 3.4.0 | Publication-quality figures |
+| cSEM | ≥ 0.5.0 | PLS-SEM estimation and prediction |
+| rsample | ≥ 1.2.0 | Cross-validation fold creation |
+| arrow | ≥ 14.0 | Parquet I/O for large prediction files |
 | dplyr | ≥ 1.1.0 | Data manipulation |
+| purrr | ≥ 1.0.0 | Functional programming (simulation) |
+| tidyr | ≥ 1.3.0 | Data reshaping (simulation) |
+| readxl | ≥ 1.4.0 | Excel data import |
+| readr | ≥ 2.1.0 | CSV I/O |
+| glue | ≥ 1.6.0 | String interpolation |
+| MASS | (base) | Multivariate normal generation (simulation) |
+| future / furrr | ≥ 1.3.0 / ≥ 0.3.0 | Parallel simulation execution |
+| parallelly | ≥ 1.36.0 | Worker management |
+
+**Note:** Manuscript figures use base R graphics (no ggplot2 dependency).
+
+Install all dependencies:
+
+```r
+install.packages(c(
+  "cSEM", "rsample", "arrow", "dplyr", "purrr",
+  "tidyr", "tibble", "readxl", "readr", "glue", "rlang",
+  "future", "furrr", "parallelly", "progressr"
+))
+```
 
 A full `sessionInfo()` output is provided in `logs/sessionInfo.txt`.
 
-## Data Sources
+## ACSI Analysis Pipeline
 
-- **ACSI data:** Publicly available from Morgeson, Hult, Mithas, Keiningham, & Fornell (2023). DOI: [10.1016/j.dib.2023.109127](https://doi.org/10.1016/j.dib.2023.109127)
-- **Simulation data:** Generated by the Monte Carlo scripts in `code_simulation/`. All random seeds are fixed and documented.
+The empirical analysis follows a strict sequential pipeline. Each script reads outputs from the previous step; no script reads raw data except `00_prepare_data.R`.
 
-## Data Availability Statement
+| Script | Input | Output | Runtime |
+|--------|-------|--------|---------|
+| `00_prepare_data.R` | Raw Excel | `acsi_clean.rds` | ~2 sec |
+| `01_measurement_audit.R` | `acsi_clean.rds` | Measurement CSVs (Table A0, HTMT, FL) | ~10 sec |
+| `02_nested_cv_search.R` | `acsi_clean.rds` | Nested CV predictions + lm benchmark | ~2–4 hours |
+| `03_summarize_and_cvpattest.R` | Parquet files | Summaries, CVPAT tests, industry breakdown, diagnostic figures | ~5 sec |
 
-The ACSI satisfaction–loyalty data used in the empirical illustration are publicly available through the American Customer Satisfaction Index national cross-sectional dataset (Morgeson et al., 2023). All analysis code, simulation scripts, random seeds, and output data files needed to reproduce the results reported in this paper are provided in this repository.
+**Key design decisions:**
+- **Package:** cSEM (PLS-PM, composite mode A)
+- **Loyalty construct:** Single-item (REPUR only); HIGHPTOL/LOWPTOL excluded (different scale, high missingness)
+- **Outer CV:** 10-fold × 5 repeats = 50 outer splits, stratified by INDUSTRY
+- **Inner CV:** 5-fold × 2 repeats per outer training set
+- **Selection rule:** Minimize inner-CV RMSE on REPUR; tie-break by MAE, then parsimony
+- **Benchmarks:** M0 theory baseline and indicator-level linear model (lm)
+- **Missing data:** Per-fold mean imputation using training-fold means only (no leakage)
 
-## Figure Specifications
-
-All figures: **600 DPI**, PNG + TIFF. Color palette: steel blue (#4682B4), orange (#E8912D), grey (#999999), red (#CC3333).
-
-## Simulation Design Summary
+## Simulation Design
 
 | Factor | Levels | Values |
 |--------|--------|--------|
@@ -131,6 +174,27 @@ All figures: **600 DPI**, PNG + TIFF. Color palette: steel blue (#4682B4), orang
 | Truth scenario | 3 | M0 (null), M6 (2 paths), M7 (3 paths) |
 | Replications per cell | — | 200 |
 | **Total replications** | **7,200** | 36 cells × 200 |
+
+## Data Sources
+
+- **ACSI data:** Publicly available from Morgeson, Hult, Mithas, Keiningham, & Fornell (2023). DOI: [10.1016/j.dib.2023.109127](https://doi.org/10.1016/j.dib.2023.109127)
+- **Simulation data:** Generated by the Monte Carlo scripts in `code_simulation/`. All random seeds are fixed and documented.
+
+## Data Availability Statement
+
+The ACSI satisfaction–loyalty data used in the empirical illustration are publicly available through the American Customer Satisfaction Index national cross-sectional dataset (Morgeson et al., 2023). All analysis code, simulation scripts, random seeds, and output data files needed to reproduce the results reported in this paper are archived in this repository and mirrored on OSF.
+
+## Figure Specifications
+
+All manuscript figures: 600 DPI, PNG + TIF dual format.
+Color palette (main): steel blue (#2C6FAC), neutral grey (#B0B0B0), red (#D94F4F).
+Color palette (simulation): steel blue (#2C6FAC, naïve), burnt orange (#D97A2B, nested/TC-PVSS), green (#3A9A5B).
+
+## Random Seeds
+
+All random seeds are fixed for exact reproducibility:
+- ACSI nested CV global seed: `20260220` (set in `code_main/02_nested_cv_search.R`)
+- Simulation global seed: `20260301` (set in `code_simulation/00_config.R`)
 
 ## License
 

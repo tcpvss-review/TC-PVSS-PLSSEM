@@ -7,8 +7,8 @@ suppressPackageStartupMessages({
   library(dplyr); library(arrow); library(readr)
 })
 
-main <- read_parquet("sim_outputs/sim_main.parquet")
-stable <- read_parquet("sim_outputs/sim_stable.parquet")
+main <- read_parquet("../sim_outputs/sim_main.parquet")
+stable <- read_parquet("../sim_outputs/sim_stable.parquet")
 
 main_ok <- main %>% filter(status == "ok")
 
@@ -25,7 +25,7 @@ Table_S2 <- main_ok %>%
     n = n(),
     .groups="drop"
   )
-write_csv(Table_S2, "sim_outputs/Table_S2_optimism.csv")
+write_csv(Table_S2, "../sim_outputs/Table_S2_optimism.csv")
 
 # Table S3: selection accuracy (optional edges)
 Table_S3 <- main_ok %>%
@@ -40,7 +40,7 @@ Table_S3 <- main_ok %>%
     n = n(),
     .groups="drop"
   )
-write_csv(Table_S3, "sim_outputs/Table_S3_selection_accuracy.csv")
+write_csv(Table_S3, "../sim_outputs/Table_S3_selection_accuracy.csv")
 
 # Table S4: stable-core tau sensitivity (true error on independent test set)
 stable_ok <- stable %>% filter(!is.na(tau))
@@ -55,6 +55,6 @@ Table_S4 <- stable_ok %>%
     n = n(),
     .groups="drop"
   )
-write_csv(Table_S4, "sim_outputs/Table_S4_stable_core_tau.csv")
+write_csv(Table_S4, "../sim_outputs/Table_S4_stable_core_tau.csv")
 
-message("Wrote:\n- sim_outputs/Table_S2_optimism.csv\n- sim_outputs/Table_S3_selection_accuracy.csv\n- sim_outputs/Table_S4_stable_core_tau.csv\n")
+message("Wrote:\n- ../sim_outputs/Table_S2_optimism.csv\n- ../sim_outputs/Table_S3_selection_accuracy.csv\n- ../sim_outputs/Table_S4_stable_core_tau.csv\n")

@@ -1,7 +1,7 @@
 # 02_run_simulation_parallel.R
 # ============================================================
 # FULL parallel runner + checkpoints + resume
-# Writes chunk checkpoints to sim_outputs/chunks, then stitches.
+# Writes chunk checkpoints to ../sim_outputs/chunks, then stitches.
 #
 # Nested pipeline evaluation uses:
 #   - frequency-weighted true RMSE/MAE (pipeline-consistent)
@@ -17,11 +17,11 @@ suppressPackageStartupMessages({
 source("00_config.R")
 source("01_core_functions.R")
 
-dir.create("sim_outputs", showWarnings = FALSE)
-dir.create("sim_outputs/chunks", recursive = TRUE, showWarnings = FALSE)
+dir.create("../sim_outputs", showWarnings = FALSE)
+dir.create("../sim_outputs/chunks", recursive = TRUE, showWarnings = FALSE)
 
 # Log file
-log_path <- file.path("sim_outputs", "run_log.txt")
+log_path <- file.path("../sim_outputs", "run_log.txt")
 cat("", file=log_path)  # reset (append later)
 
 log_to_file <- function(...) {
@@ -56,7 +56,7 @@ progressr::handlers("txtprogressbar")
 
 # Helper: determine which chunk ids already exist
 existing_chunks <- function() {
-  files <- list.files("sim_outputs/chunks", pattern="^main_\\d{6}_\\d{6}\\.parquet$", full.names=FALSE)
+  files <- list.files("../sim_outputs/chunks", pattern="^main_\\d{6}_\\d{6}\\.parquet$", full.names=FALSE)
   if (length(files)==0) return(character(0))
   sub("^main_(\\d{6}_\\d{6})\\.parquet$", "\\1", files)
 }
@@ -187,25 +187,25 @@ with_progress({
     main_part   <- dplyr::bind_rows(purrr::map(res_chunk, "main"))
     stable_part <- dplyr::bind_rows(purrr::map(res_chunk, "stable"))
 
-    arrow::write_parquet(main_part,   file.path("sim_outputs/chunks", paste0("main_", part_id, ".parquet")))
-    arrow::write_parquet(stable_part, file.path("sim_outputs/chunks", paste0("stable_", part_id, ".parquet")))
+    arrow::write_parquet(main_part,   file.path("../sim_outputs/chunks", paste0("main_", part_id, ".parquet")))
+    arrow::write_parquet(stable_part, file.path("../sim_outputs/chunks", paste0("stable_", part_id, ".parquet")))
   }
 })
 
 # Stitch chunks
 log_to_file("Stitching chunks ...")
-main_files   <- list.files("sim_outputs/chunks", pattern="^main_.*\\.parquet$", full.names=TRUE)
-stable_files <- list.files("sim_outputs/chunks", pattern="^stable_.*\\.parquet$", full.names=TRUE)
+main_files   <- list.files("../sim_outputs/chunks", pattern="^main_.*\\.parquet$", full.names=TRUE)
+stable_files <- list.files("../sim_outputs/chunks", pattern="^stable_.*\\.parquet$", full.names=TRUE)
 
 main   <- dplyr::bind_rows(lapply(main_files, arrow::read_parquet))
 stable <- dplyr::bind_rows(lapply(stable_files, arrow::read_parquet))
 
-arrow::write_parquet(main,   "sim_outputs/sim_main.parquet")
-arrow::write_parquet(stable, "sim_outputs/sim_stable.parquet")
+arrow::write_parquet(main,   "../sim_outputs/sim_main.parquet")
+arrow::write_parquet(stable, "../sim_outputs/sim_stable.parquet")
 
-write.csv(main,   "sim_outputs/sim_main.csv", row.names=FALSE)
-write.csv(stable, "sim_outputs/sim_stable.csv", row.names=FALSE)
+write.csv(main,   "../sim_outputs/sim_main.csv", row.names=FALSE)
+write.csv(stable, "../sim_outputs/sim_stable.csv", row.names=FALSE)
 
-log_to_file("DONE. Wrote sim_outputs/sim_main.* and sim_outputs/sim_stable.*")
+log_to_file("DONE. Wrote ../sim_outputs/sim_main.* and ../sim_outputs/sim_stable.*")
 
 future::plan(future::sequential)
